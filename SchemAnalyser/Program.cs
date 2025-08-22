@@ -151,61 +151,61 @@ namespace SchemAnalyser
             );
             Console.WriteLine($"Score: {score}");
             
-            using Game wit = new Game();
-            wit.Load += () =>
-            {
-                var cube = new Model([
-                    0,1,2,2,3,0,  4,5,6,6,7,4,
-                    0,1,5,5,4,0,  2,3,7,7,6,2,
-                    0,3,7,7,4,0,  1,2,6,6,5,1
-                ], [
-                    -0.5f,-0.5f,-0.5f,  0.5f,-0.5f,-0.5f,  0.5f,0.5f,-0.5f, -0.5f,0.5f,-0.5f,
-                    -0.5f,-0.5f,0.5f,   0.5f,-0.5f,0.5f,   0.5f,0.5f,0.5f,  -0.5f,0.5f,0.5f
-                ]);
-                
-                var b2 = modelloader.Load(rm.ReadToEndOrThrow(
-                    rm["minecraft:models/cube.json"]));
-
-
-                //for (int x = -128; x < 128; x++)
-                //{
-                //    for (int z = -128; z < 128; z++)
-                //    {
-                //        wit.objects.Add(new GObject(new Vector3(x, 0, z), b2, new Vector3(200, 100, 2)));
-                //    }
-                //}
-                
-                foreach (var grid in schematic.ShipGrids)
-                {
-                    var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-                    var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-                    
-                    foreach (var blockEntry in grid.Blocks)
-                    {
-                        var pos = new Vector3(blockEntry.x, blockEntry.y, blockEntry.z);
-
-                        min.X = Math.Min(min.X, pos.X);
-                        min.Y = Math.Min(min.Y, pos.Y);
-                        min.Z = Math.Min(min.Z, pos.Z);
-
-                        max.X = Math.Max(max.X, pos.X);
-                        max.Y = Math.Max(max.Y, pos.Y);
-                        max.Z = Math.Max(max.Z, pos.Z);
-                    }
-                    
-                    var center = (min + max) * 0.5f;
-                    
-                    foreach (var blockEntry in grid.Blocks)
-                    {
-                        wit.objects.Add(new GObject(
-                            center - new Vector3(blockEntry.x, blockEntry.y, blockEntry.z), 
-                            b2, 
-                            TextToColor(schematic.BlockPallete[blockEntry.pid].Name)
-                            ));
-                    }
-                }
-            };
-            wit.Run();
+            //using Game wit = new Game();
+            //wit.Load += () =>
+            //{
+            //    var cube = new Model([
+            //        0,1,2,2,3,0,  4,5,6,6,7,4,
+            //        0,1,5,5,4,0,  2,3,7,7,6,2,
+            //        0,3,7,7,4,0,  1,2,6,6,5,1
+            //    ], [
+            //        -0.5f,-0.5f,-0.5f,  0.5f,-0.5f,-0.5f,  0.5f,0.5f,-0.5f, -0.5f,0.5f,-0.5f,
+            //        -0.5f,-0.5f,0.5f,   0.5f,-0.5f,0.5f,   0.5f,0.5f,0.5f,  -0.5f,0.5f,0.5f
+            //    ]);
+            //    
+            //    var b2 = modelloader.Load(rm.ReadToEndOrThrow(
+            //        rm["minecraft:models/cube.json"]));
+//
+//
+            //    //for (int x = -128; x < 128; x++)
+            //    //{
+            //    //    for (int z = -128; z < 128; z++)
+            //    //    {
+            //    //        wit.objects.Add(new GObject(new Vector3(x, 0, z), b2, new Vector3(200, 100, 2)));
+            //    //    }
+            //    //}
+            //    
+            //    foreach (var grid in schematic.ShipGrids)
+            //    {
+            //        var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            //        var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+            //        
+            //        foreach (var blockEntry in grid.Blocks)
+            //        {
+            //            var pos = new Vector3(blockEntry.x, blockEntry.y, blockEntry.z);
+//
+            //            min.X = Math.Min(min.X, pos.X);
+            //            min.Y = Math.Min(min.Y, pos.Y);
+            //            min.Z = Math.Min(min.Z, pos.Z);
+//
+            //            max.X = Math.Max(max.X, pos.X);
+            //            max.Y = Math.Max(max.Y, pos.Y);
+            //            max.Z = Math.Max(max.Z, pos.Z);
+            //        }
+            //        
+            //        var center = (min + max) * 0.5f;
+            //        
+            //        foreach (var blockEntry in grid.Blocks)
+            //        {
+            //            wit.objects.Add(new GObject(
+            //                center - new Vector3(blockEntry.x, blockEntry.y, blockEntry.z), 
+            //                b2, 
+            //                TextToColor(schematic.BlockPallete[blockEntry.pid].Name)
+            //                ));
+            //        }
+            //    }
+            //};
+            //wit.Run();
         }
         
         public static Vector3 TextToColor(string text)
