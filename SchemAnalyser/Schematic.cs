@@ -23,7 +23,7 @@ namespace SchemAnalyser
         public void Visit(ISchematicVisitor visitor)
         {
             visitor.Visit(this);
-            foreach(var block in ShipGrids) visitor.VisitShipGrid(block);
+            foreach(var grid in ShipGrids) visitor.VisitShipGrid(grid);
             foreach(var entity in EntityItems) visitor.VisitEntity(entity);
         }
 
@@ -31,12 +31,9 @@ namespace SchemAnalyser
         {
             var reader = new BinaryReader(stream, Encoding.UTF8, leaveOpen: true);
             var str = ReadUtf(reader, 400);
-
-            Console.WriteLine(str);
+            
 
             str = ReadUtf(reader, 400);
-
-            Console.WriteLine(str);
             
             using (var gzipStream = new GZipStream(stream, CompressionMode.Decompress))
             {
@@ -51,12 +48,13 @@ namespace SchemAnalyser
                     var properties = new Dictionary<string, string>();
                     if (entry.ContainsKey("Properties"))
                     {
+                        
                         foreach (var prop in entry["Properties"].AsTagCompound())
                         {
                             properties[prop.Key] = prop.Value.AsString();
                         }
                     }
-
+                    
                     blockStates.Add(new BlockState()
                     {
                         Name = entry["Name"].AsString(),
@@ -65,7 +63,6 @@ namespace SchemAnalyser
                 }
 
                 var shipGrids = new List<ShipGrid>();
-
                 foreach (var entry in rootTag["gridData"].AsTagCompound())
                 {
                     var blocks = new List<ShipGrid.BlockEntry>();
@@ -80,39 +77,39 @@ namespace SchemAnalyser
                             edi = data["edi"].AsInt(),
                         });
                         
-                        Console.WriteLine(data["x"].AsInt() + " " + data["y"].AsInt() + " " + data["z"].AsInt());
+                        //Console.WriteLine(data["x"].AsInt() + " " + data["y"].AsInt() + " " + data["z"].AsInt() + blockStates[data["pid"].AsInt()].Name);
                     }
 
                     shipGrids.Add(new ShipGrid() { Id = entry.Key, Blocks = blocks });
                 }
-
                 var extraBlocks = new List<TagCompound>();
-
+                
                 foreach (var entry in rootTag["extraBlockData"].AsTagList<TagCompound>())
                 {
                     extraBlocks.Add(entry);
                 }
 
                 var entityItems = new List<EntityItem>();
+                
+                
                 if (rootTag.ContainsKey("entityData"))
                 {
-                    foreach (var entry in rootTag["entityData"].AsTagCompound())
-                    {
-                        foreach (var rs in entry.Value.AsTagList<TagCompound>())
+                        foreach (var entry in rootTag["entityData"].AsTagCompound())
                         {
-                            entityItems.Add(new EntityItem()
+                            foreach (var rs in entry.Value as dynamic)
                             {
-                                Pos = new(
-                                    rs["posx"].AsDouble(),
-                                    rs["posy"].AsDouble(),
-                                    rs["posz"].AsDouble()
-                                ),
-                                Tag = rs["entity"].AsTagCompound(),
-                            });
+                                entityItems.Add(new EntityItem()
+                                {
+                                    Pos = new(
+                                        rs["posx"].AsDouble(),
+                                        rs["posy"].AsDouble(),
+                                        rs["posz"].AsDouble()
+                                    ),
+                                    Tag = rs["entity"].AsTagCompound(),
+                                });
+                            }
                         }
-                    }
                 }
-
                 var schema = new Schematic()
                 {
                     BlockPallete = blockStates,
