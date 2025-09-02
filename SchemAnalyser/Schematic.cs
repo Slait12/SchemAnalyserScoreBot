@@ -12,19 +12,20 @@ namespace SchemAnalyser
         public Vector3d Pos { get; set; }
         public TagCompound Tag { get; set; }
     }
+    
     public class Schematic
     {
         public List<TagCompound> ExtraBlockData { get; set; }
         public List<BlockState> BlockPallete { get; set; }
         public List<ShipGrid> ShipGrids { get; set; }
-        
         public List<EntityItem> EntityItems { get; set; }
 
         public void Visit(ISchematicVisitor visitor)
         {
             visitor.Visit(this);
-            foreach(var grid in ShipGrids) visitor.VisitShipGrid(grid);
+            foreach(var grid in ShipGrids) visitor.VisitShipGrid(grid); 
             foreach(var entity in EntityItems) visitor.VisitEntity(entity);
+            foreach(var itemData in ExtraBlockData) visitor.VisitItems(itemData);
         }
 
         public static Schematic FromStream(Stream stream)
@@ -82,34 +83,32 @@ namespace SchemAnalyser
 
                     shipGrids.Add(new ShipGrid() { Id = entry.Key, Blocks = blocks });
                 }
-                var extraBlocks = new List<TagCompound>();
                 
-                foreach (var entry in rootTag["extraBlockData"].AsTagList<TagCompound>())
+                var extraBlocks = new List<TagCompound>();
+                foreach (var entry in rootTag["extraBlockData"] as dynamic)
                 {
                     extraBlocks.Add(entry);
                 }
 
                 var entityItems = new List<EntityItem>();
-                
-                
-                if (rootTag.ContainsKey("entityData"))
-                {
-                        foreach (var entry in rootTag["entityData"].AsTagCompound())
-                        {
-                            foreach (var rs in entry.Value as dynamic)
-                            {
-                                entityItems.Add(new EntityItem()
-                                {
-                                    Pos = new(
-                                        rs["posx"].AsDouble(),
-                                        rs["posy"].AsDouble(),
-                                        rs["posz"].AsDouble()
-                                    ),
-                                    Tag = rs["entity"].AsTagCompound(),
-                                });
-                            }
-                        }
-                }
+               if (rootTag.ContainsKey("entityData"))
+               {
+                   foreach (var entry in rootTag["entityData"].AsTagCompound())
+                   {
+                       foreach (var rs in entry.Value as dynamic)
+                       {
+                           entityItems.Add(new EntityItem()
+                           {
+                               Pos = new(
+                                   rs["posx"].AsDouble(),
+                                   rs["posy"].AsDouble(),
+                                   rs["posz"].AsDouble()
+                                   ),
+                               Tag = rs["entity"].AsTagCompound(),
+                           });
+                       }
+                   }
+               }
                 var schema = new Schematic()
                 {
                     BlockPallete = blockStates,

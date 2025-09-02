@@ -1,5 +1,6 @@
 ﻿
 using System.Collections;
+using System.Drawing;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -252,14 +253,25 @@ namespace SchemAnalyser
                         {
                             byte[] fileData = await client.GetByteArrayAsync(message.Attachments.First().Url);
                             var info = GetTotalShipsInfo(fileData);
-
-                            string response = $"<@!{message.Author.Id}> SCHEMATIC INFO:\n" +
-                                              $"Total block count: {info.TotalShipsBlockCount}\n" +
-                                              $"Total ship count: {info.ShipGridsCount}\n" +
-                                              $"Total entity count: {info.EntityItemsCount}\n\n" +
-                                              $"Total ships power: {info.TotalShipsPower}\n";
                             
-                            
+                            var response = new CreateMessageOptions()
+                                .AddEmbed(new EmbedOptions()
+                                    {
+                                        Title = "SCHEM ANALYSIS",
+                                        Description = null,
+                                        Url = null,
+                                        Timestamp = null,
+                                        Color = new DiscordColor(100,220,220),
+                                        Footer = null,
+                                        ImageUrl = null,
+                                        Author = null,
+                                        ThumbnailUrl = null
+                                    }
+                                    .AddField("Количество блоков", info.TotalShipsBlockCount.ToString())
+                                    .AddField("Количество кораблей", info.ShipGridsCount.ToString())
+                                    .AddField("Количество сущностей", info.EntityItemsCount.ToString())
+                                    .AddField("МОЩНОСТЬ ТЕХНИКИ", info.TotalShipsPower.ToString())
+                                );
                                               
 
                             await http!.CreateMessage(message.ChannelId, response);
@@ -351,9 +363,41 @@ namespace SchemAnalyser
 
                     IncrementNested(block.Name, states);
                 }
+                
+                public void VisitItems(TagCompound tag)
+                {
+                    //Console.WriteLine(JsonSerializer.Serialize(tag, new JsonSerializerOptions
+                    //{
+                    //    WriteIndented = true
+                    //}));
+                    if (tag.ContainsKey("Items"))
+                    {
+                        var compound = tag["Items"].AsTagList<TagCompound>();
+
+                        foreach (dynamic i in compound)
+                        {
+                            Console.WriteLine(i["id"].Value);
+                            Increment(i["id"].Value);
+                            Data[i["id"].Value] += i["Count"].Value-1;
+                            if (i.ContainsKey("tag"))
+                            {
+                                var nestedCompund = i["tag"].AsTagCompound()["BlockEntityTag"].AsTagCompound();
+                                VisitItems(nestedCompund);
+                            }
+                                
+                        }
+                    }
+                }
 
                 public void VisitEntity(EntityItem entityItem)
                 {
+                    //Console.WriteLine(
+                    //    JsonSerializer.Serialize(entityItem.Tag, new JsonSerializerOptions
+                    //    {
+                    //        WriteIndented = true
+                    //    })
+                    //);
+                    
                     if (!entityItem.Tag.ContainsKey("Contraption"))
                         return;
 
